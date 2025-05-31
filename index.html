@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search Animation</title>
+    <style>
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 40px;
+            color: rgb(36, 67, 240);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            background-color: rgb(82, 246, 0);
+            display: inline-block;
+            padding: 5px 50px;
+            border-radius: 25px;
+
+        }
+
+        body {
+
+
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        td {
+            font-size: 40px;
+            color: rgb(0, 0, 0);
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+
+        }
+
+        input {
+            font-size: 30px;
+        }
+
+        p {
+            font-size: 50px;
+            display: inline-block;
+            padding: 5px 50px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+
+
+        }
+
+        .box-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+            position: relative;
+        }
+
+        .box-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+            position: relative;
+        }
+
+        .box {
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            font-size: 22px;
+            background-color: lightgray;
+            border: 2px solid black;
+            text-align: center;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+
+        }
+
+        .arrow {
+            font-size: 22px;
+            font-weight: bold;
+            display: none;
+            position: absolute;
+            top: -30px;
+            color: white;
+        }
+
+        .label {
+            font-size: 18px;
+            font-weight: bold;
+            display: none;
+            color: white;
+            background-color: black;
+            padding: 4px 6px;
+            border-radius: 5px;
+            position: absolute;
+            bottom: -30px;
+        }
+
+        .low {
+            background-color: yellow;
+        }
+
+        .high {
+            background-color: red;
+            color: white;
+        }
+
+        .mid {
+            background-color: green;
+            color: white;
+        }
+
+        .found {
+            background-color: lime;
+        }
+
+        input[type="button"]:hover {
+            cursor: pointer;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: url('binarySearch.png') no-repeat center center/cover;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        .button {
+            border-radius: 25px;
+        }
+
+        .button:hover {
+            color: rgb(243, 77, 0);
+            background-color: aqua;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background"></div>
+    <h1>Binary Search Animation</h1>
+    <table align="center" cellspacing="10">
+        <tr>
+            <td>Enter Array:</td>
+            <td><input type="text" id="arr" placeholder="Ex: 1,2,3,4,5" required></td>
+        </tr>
+        <tr>
+            <td>Enter Element:</td>
+            <td><input type="text" id="ele" placeholder="Any integer" required></td>
+        </tr>
+        <tr>
+            <td><br></td>
+        </tr>
+        <tr>
+            <td colspan="2"><input type="button" value="Start Search" class="button" onclick="startBinarySearch()"></td>
+        </tr>
+    </table>
+
+
+    <div class="box-container" id="arrayContainer"></div>
+    <br><br><br><br><br>
+    <p id="output"></p>
+
+    <script>
+        async function startBinarySearch() {
+            let arr = document.getElementById("arr").value.split(',').map(Number);
+            let target = parseInt(document.getElementById("ele").value);
+
+            if (arr.some(isNaN) || isNaN(target)) {
+                document.getElementById("output").textContent = "Please enter valid numbers!";
+                return;
+            }
+
+            arr.sort((a, b) => a - b);
+            let container = document.getElementById("arrayContainer");
+            container.innerHTML = "";
+
+
+            arr.forEach((num, index) => {
+                let wrapper = document.createElement("div");
+                wrapper.className = "box-wrapper";
+                wrapper.id = "wrapper-" + index;
+
+                let arrow = document.createElement("div");
+                arrow.className = "arrow";
+                arrow.id = "arrow-" + index;
+                arrow.textContent = "↓";
+
+                let box = document.createElement("div");
+                box.className = "box";
+                box.textContent = num;
+                box.id = "box-" + index;
+
+                let label = document.createElement("div");
+                label.className = "label";
+                label.id = "label-" + index;
+
+                wrapper.appendChild(arrow);
+                wrapper.appendChild(box);
+                wrapper.appendChild(label);
+                container.appendChild(wrapper);
+            });
+
+            let low = 0, high = arr.length - 1;
+            document.getElementById("output").textContent = "Searching...";
+
+            while (low <= high) {
+                let mid = Math.floor((low + high) / 2);
+
+                highlightBoxes(low, high, mid);
+                await delay(1300);
+
+                if (arr[mid] === target) {
+                    document.getElementById("box-" + mid).classList.add("found");
+                    document.getElementById("output").textContent = `Found at index ${mid}`;
+                    return;
+                } else if (arr[mid] < target) {
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+
+            document.getElementById("output").textContent = "Element not found!";
+        }
+
+        function highlightBoxes(low, high, mid) {
+            document.querySelectorAll(".box").forEach(box => {
+                box.classList.remove("low", "high", "mid", "found");
+            });
+            document.querySelectorAll(".arrow, .label").forEach(el => {
+                el.style.display = "none";
+            });
+
+            if (low <= high) {
+                document.getElementById("box-" + low).classList.add("low");
+                document.getElementById("box-" + high).classList.add("high");
+                document.getElementById("box-" + mid).classList.add("mid");
+
+                document.getElementById("arrow-" + low).style.display = "block";
+                document.getElementById("arrow-" + high).style.display = "block";
+                document.getElementById("arrow-" + mid).style.display = "block";
+
+                document.getElementById("label-" + low).textContent = "Low";
+                document.getElementById("label-" + high).textContent = "High";
+                document.getElementById("label-" + mid).textContent = "Mid";
+
+                document.getElementById("label-" + low).style.display = "block";
+                document.getElementById("label-" + high).style.display = "block";
+                document.getElementById("label-" + mid).style.display = "block";
+            }
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+
+</html>
